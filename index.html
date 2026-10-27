@@ -5,100 +5,117 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>A Secret Message from Milo 🐾</title>
+
 <style>
-  body {
-    background: #fff0f5;
-    font-family: Georgia, serif;
-    text-align: center;
-    padding: 35px 18px;
-    color: #593d4b;
-  }
-  .letter {
-    max-width: 550px;
-    margin: auto;
-    background: white;
-    padding: 28px;
-    border-radius: 20px;
-    box-shadow: 0 5px 25px #eacbd8;
-  }
-  button {
-    background: #dc85aa;
-    color: white;
-    border: none;
-    padding: 15px 24px;
-    border-radius: 30px;
-    font-size: 16px;
-    cursor: pointer;
-    margin: 20px;
-  }
-  #secret {
-    display: none;
-    white-space: pre-line;
-    text-align: left;
-    line-height: 1.8;
-  }
-  #woofs {
-    overflow-wrap: anywhere;
-    max-height: 180px;
-    overflow-y: auto;
-    font-size: 12px;
-  }
+body {
+  background: #fff0f5;
+  font-family: Georgia, serif;
+  text-align: center;
+  padding: 35px 18px;
+  color: #593d4b;
+}
+
+.letter {
+  max-width: 550px;
+  margin: auto;
+  background: white;
+  padding: 28px;
+  border-radius: 20px;
+  box-shadow: 0 5px 25px #eacbd8;
+}
+
+h1 { color: #b85c87; }
+
+button {
+  background: #dc85aa;
+  color: white;
+  border: none;
+  padding: 15px 24px;
+  border-radius: 30px;
+  font-size: 16px;
+  cursor: pointer;
+  margin: 20px 0;
+}
+
+button:hover { background: #bd6490; }
+
+#woofs {
+  width: 100%;
+  box-sizing: border-box;
+  height: 150px;
+  padding: 12px;
+  border: 1px solid #eacbd8;
+  border-radius: 12px;
+  background: #fff9fc;
+  overflow-wrap: anywhere;
+  resize: vertical;
+}
+
+#secret {
+  display: none;
+  white-space: pre-wrap;
+  text-align: left;
+  line-height: 1.8;
+  padding: 20px;
+  background: #fff9fc;
+  border-radius: 12px;
+}
 </style>
 </head>
+
 <body>
 <div class="letter">
   <h1>🐶 A Secret Message from Milo</h1>
-  <p>I have something important to tell you...</p>
+  <p>I have something very important to tell you...</p>
   <p>But I only speak dog! 🐾</p>
 
-  <div id="woofs"></div>
+  <p>Can you translate my woofs?</p>
 
-  <button onclick="decode()">Translate My Woofs 🐾</button>
+  <textarea id="woofs"
+    placeholder="Paste Milo's secret woofs here..."></textarea>
+
+  <button onclick="decode()">
+    🐾 Decode Milo's Message 🐾
+  </button>
 
   <div id="secret"></div>
 </div>
 
 <script>
-const message = `Dear Human,
-
-I have something very important to tell you.
-
-Every time you come home, my whole world gets brighter. I don’t care how long you’ve been gone. I’ll always be waiting for you, probably with a toy (or something random) in my mouth.
-
-You are one of my favorite peoples, my safest place, and the reason my tail never stops wagging.
-
-If I could speak your language, I’d tell you how much I love you every single day.
-
-But since I can’t, I’ll just say…
-
-Woof woof.
-
-Love,
-Milo 🐾`;
-
-const bytes = new TextEncoder().encode(message);
-const encoded = Array.from(bytes, byte =>
-  byte.toString(2).padStart(8, "0")
-    .replace(/0/g, "woof ")
-    .replace(/1/g, "WOOF ")
-    .trim()
-).join(" | ");
-
-document.getElementById("woofs").textContent = encoded;
-
 function decode() {
-  const groups = encoded.split(" | ");
-  const numbers = groups.map(group => {
-    const binary = group.split(" ")
-      .map(sound => sound === "WOOF" ? "1" : "0")
-      .join("");
-    return parseInt(binary, 2);
-  });
+  const code = document.getElementById("woofs").value;
+  const secret = document.getElementById("secret");
 
-  const decoded = new TextDecoder().decode(new Uint8Array(numbers));
-  document.getElementById("secret").textContent = decoded;
-  document.getElementById("secret").style.display = "block";
-  document.getElementById("woofs").style.display = "none";
+  try {
+    const groups = code.trim().split(/\s*\|\s*/);
+
+    const numbers = groups.map(group => {
+      const sounds = group.trim().split(/\s+/);
+
+      if (sounds.length !== 8 ||
+          sounds.some(s => s !== "woof" && s !== "WOOF")) {
+        throw new Error("Invalid woof code");
+      }
+
+      const binary = sounds.map(sound =>
+        sound === "WOOF" ? "1" : "0"
+      ).join("");
+
+      return parseInt(binary, 2);
+    });
+
+    const decoded = new TextDecoder(
+      "utf-8", {fatal: true}
+    ).decode(new Uint8Array(numbers));
+
+    secret.textContent = decoded;
+    secret.style.display = "block";
+
+  } catch (error) {
+    secret.textContent =
+      "Oops! Milo couldn't understand those woofs. 🐶";
+    secret.style.display = "block";
+  }
 }
 </script>
 </body>
