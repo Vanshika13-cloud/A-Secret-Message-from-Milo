@@ -74,6 +74,10 @@ button:hover { background: #bd6490; }
   <textarea id="woofs"
     placeholder="Paste Milo's secret woofs here..."></textarea>
 
+  <button onclick="generate()">
+  🐶 Generate Milo's Woofs 🐾
+  </button>
+
   <button onclick="decode()">
     🐾 Decode Milo's Message 🐾
   </button>
@@ -89,6 +93,26 @@ button:hover { background: #bd6490; }
 <script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
 
 <script>
+  async function generate() {
+  const woofs = document.getElementById("woofs");
+  const secret = document.getElementById("secret");
+
+  try {
+    const response = await fetch("./milo-secret.txt");
+
+    if (!response.ok) {
+      throw new Error("Secret letter file not found");
+    }
+
+    woofs.value = (await response.text()).trim();
+
+    secret.textContent = "";
+    secret.style.display = "none";
+
+  } catch (error) {
+    alert("Milo's secret letter could not be loaded. 🐶");
+  }
+}
 function decode() {
   const secret = document.getElementById("secret");
 
