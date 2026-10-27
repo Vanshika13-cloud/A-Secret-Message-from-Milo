@@ -81,41 +81,69 @@ button:hover { background: #bd6490; }
   <div id="secret"></div>
 </div>
 
+
+<script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
+
+<script>
+
+<script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
+
 <script>
 function decode() {
-  const code = document.getElementById("woofs").value;
   const secret = document.getElementById("secret");
 
   try {
-    const groups = code.trim().split(/\s*\|\s*/);
+    const sounds = ["woof", "arf", "ruff", "yip"];
+    const alphabet =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
-    const numbers = groups.map(group => {
-      const sounds = group.trim().split(/\s+/);
+    const tokens = document.getElementById("woofs")
+      .value.trim().split(/\s+/);
 
-      if (sounds.length !== 8 ||
-          sounds.some(s => s !== "woof" && s !== "WOOF")) {
-        throw new Error("Invalid woof code");
+    if (!tokens.length || !tokens[0]) {
+      throw new Error("Empty message");
+    }
+
+    const base64url = tokens.map(token => {
+      const parts = token.toLowerCase().split("-");
+
+      if (parts.length !== 3) {
+        throw new Error("Invalid bark");
       }
 
-      const binary = sounds.map(sound =>
-        sound === "WOOF" ? "1" : "0"
-      ).join("");
+      const digits = parts.map(s => sounds.indexOf(s));
 
-      return parseInt(binary, 2);
-    });
+      if (digits.includes(-1)) {
+        throw new Error("Unknown bark");
+      }
 
-    const decoded = new TextDecoder(
-      "utf-8", {fatal: true}
-    ).decode(new Uint8Array(numbers));
+      return alphabet[
+        digits[0] * 16 + digits[1] * 4 + digits[2]
+      ];
+    }).join("");
 
-    secret.textContent = decoded;
-    secret.style.display = "block";
+    const base64 = base64url
+      .replace(/-/g, "+")
+      .replace(/_/g, "/");
 
-  } catch (error) {
+    const padded = base64.padEnd(
+      Math.ceil(base64.length / 4) * 4, "="
+    );
+
+    const bytes = Uint8Array.from(
+      atob(padded), c => c.charCodeAt(0)
+    );
+
+    secret.textContent = pako.inflate(
+      bytes, {to: "string"}
+    );
+
+  } catch (e) {
     secret.textContent =
-      "Oops! Milo couldn't understand those woofs. 🐶";
-    secret.style.display = "block";
+      "Oops! Milo couldn't understand those barks. Check that you copied the entire code. 🐶";
   }
+
+  secret.style.display = "block";
 }
 </script>
 </body>
