@@ -1,0 +1,105 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Secret Message from Milo 🐾</title>
+<style>
+  body {
+    background: #fff0f5;
+    font-family: Georgia, serif;
+    text-align: center;
+    padding: 35px 18px;
+    color: #593d4b;
+  }
+  .letter {
+    max-width: 550px;
+    margin: auto;
+    background: white;
+    padding: 28px;
+    border-radius: 20px;
+    box-shadow: 0 5px 25px #eacbd8;
+  }
+  button {
+    background: #dc85aa;
+    color: white;
+    border: none;
+    padding: 15px 24px;
+    border-radius: 30px;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 20px;
+  }
+  #secret {
+    display: none;
+    white-space: pre-line;
+    text-align: left;
+    line-height: 1.8;
+  }
+  #woofs {
+    overflow-wrap: anywhere;
+    max-height: 180px;
+    overflow-y: auto;
+    font-size: 12px;
+  }
+</style>
+</head>
+<body>
+<div class="letter">
+  <h1>🐶 A Secret Message from Milo</h1>
+  <p>I have something important to tell you...</p>
+  <p>But I only speak dog! 🐾</p>
+
+  <div id="woofs"></div>
+
+  <button onclick="decode()">Translate My Woofs 🐾</button>
+
+  <div id="secret"></div>
+</div>
+
+<script>
+const message = `Dear Human,
+
+I have something very important to tell you.
+
+Every time you come home, my whole world gets brighter. I don’t care how long you’ve been gone. I’ll always be waiting for you, probably with a toy (or something random) in my mouth.
+
+You are one of my favorite peoples, my safest place, and the reason my tail never stops wagging.
+
+If I could speak your language, I’d tell you how much I love you every single day.
+
+But since I can’t, I’ll just say…
+
+Woof woof.
+
+Love,
+Milo 🐾`;
+
+const bytes = new TextEncoder().encode(message);
+const encoded = Array.from(bytes, byte =>
+  byte.toString(2).padStart(8, "0")
+    .replace(/0/g, "woof ")
+    .replace(/1/g, "WOOF ")
+    .trim()
+).join(" | ");
+
+document.getElementById("woofs").textContent = encoded;
+
+function decode() {
+  const groups = encoded.split(" | ");
+  const numbers = groups.map(group => {
+    const binary = group.split(" ")
+      .map(sound => sound === "WOOF" ? "1" : "0")
+      .join("");
+    return parseInt(binary, 2);
+  });
+
+  const decoded = new TextDecoder().decode(new Uint8Array(numbers));
+  document.getElementById("secret").textContent = decoded;
+  document.getElementById("secret").style.display = "block";
+  document.getElementById("woofs").style.display = "none";
+}
+</script>
+</body>
+</html>
